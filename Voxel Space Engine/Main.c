@@ -1,14 +1,22 @@
 #include <stdio.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <math.h>
+
 #include <SDL.h>
 
 #define FALSE 0
 #define TRUE 1
 
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH 320
+#define HEIGHT 200
 
 SDL_Window* window;
 SDL_Renderer* renderer;
+
+uint32_t* frameBuffer = NULL;
+SDL_Texture* frameBufferTexture = NULL;
 
 int running = FALSE;
 
@@ -38,8 +46,35 @@ int InitializeWindow(void)
 		return FALSE;
 	}
 
+	frameBuffer = (uint32_t*)malloc(WIDTH * HEIGHT * sizeof(uint32_t));
+
+	frameBufferTexture = SDL_CreateTexture(renderer,SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
+
 	return TRUE;
 
+}
+
+void DrawPixel(int x, int y, uint32_t color)
+{
+	if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
+		return;
+	}
+	frameBuffer[(WIDTH * y) + x] = color;
+}
+
+void RenderFrameBuffer()
+{
+	SDL_UpdateTexture(frameBufferTexture, NULL, frameBuffer, (int)(WIDTH * sizeof(uint32_t)));
+	SDL_RenderCopy(renderer, frameBufferTexture, NULL, NULL);
+
+	SDL_RenderPresent(renderer);
+}
+
+void ClearFameBuffer(uint32_t color)
+{
+	for (int i = 0; i < WIDTH * HEIGHT; i++) {
+		frameBuffer[i] = color;
+	}
 }
 
 void Setup()
@@ -77,16 +112,15 @@ void Update()
 
 void Render()
 {
-	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 
-	SDL_Rect rect = { 20, 20, 15, 15 };
+	ClearFameBuffer(0xFF00FF00);
 
-	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+	//Draw Stuff
+	DrawPixel(100, 100, 0xFF0000FF);
 
-	SDL_RenderFillRect(renderer, &rect);
-
-	SDL_RenderPresent(renderer);
+	RenderFrameBuffer();
 }
 
 void Destroy()
