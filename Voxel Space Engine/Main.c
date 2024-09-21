@@ -5,9 +5,13 @@
 #include <math.h>
 
 #include <SDL.h>
+#include "Gifdec/gifdec.h"
 
 #define FALSE 0
 #define TRUE 1
+
+#define WINDOW_WIDTH 1280
+#define WINDOW_HEIGHT 800
 
 #define WIDTH 320
 #define HEIGHT 200
@@ -17,6 +21,9 @@ SDL_Renderer* renderer;
 
 uint32_t* frameBuffer = NULL;
 SDL_Texture* frameBufferTexture = NULL;
+
+uint8_t* heightMap = NULL;
+uint8_t* colorMap = NULL;
 
 int running = FALSE;
 
@@ -30,7 +37,7 @@ int InitializeWindow(void)
 		return FALSE;
 	}
 
-	window = SDL_CreateWindow("Voxel Space Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, NULL);
+	window = SDL_CreateWindow("Voxel Space Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, NULL);
 
 	if (!window)
 	{
@@ -45,10 +52,6 @@ int InitializeWindow(void)
 		printf("Error creating SDL Renderer");
 		return FALSE;
 	}
-
-	frameBuffer = (uint32_t*)malloc(WIDTH * HEIGHT * sizeof(uint32_t));
-
-	frameBufferTexture = SDL_CreateTexture(renderer,SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
 
 	return TRUE;
 
@@ -79,6 +82,10 @@ void ClearFameBuffer(uint32_t color)
 
 void Setup()
 {
+	frameBuffer = (uint32_t*)malloc(WIDTH * HEIGHT * sizeof(uint32_t));
+	frameBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
+
+	int mapWidth, mapHeight, mapCount;
 
 }
 
