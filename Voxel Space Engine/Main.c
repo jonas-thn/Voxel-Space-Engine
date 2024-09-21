@@ -76,6 +76,12 @@ void Render()
 	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 	SDL_RenderClear(renderer);
 
+	SDL_Rect rect = { 20, 20, 15, 15 };
+
+	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+
+	SDL_RenderFillRect(renderer, &rect);
+
 	SDL_RenderPresent(renderer);
 }
 
