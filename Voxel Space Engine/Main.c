@@ -12,6 +12,8 @@ SDL_Renderer* renderer;
 
 int running = FALSE;
 
+int lastFrameTime = 0;
+
 int InitializeWindow(void)
 {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
@@ -68,7 +70,9 @@ void Input()
 
 void Update()
 {
+	float deltaTime = (SDL_GetTicks() - lastFrameTime) / 1000.0;
 
+	lastFrameTime = SDL_GetTicks();
 }
 
 void Render()
