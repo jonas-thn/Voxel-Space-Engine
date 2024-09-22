@@ -18,6 +18,15 @@
 #define WIDTH 320
 #define HEIGHT 200
 
+typedef struct
+{
+	float x;
+	float y;
+	float zFar;
+} camera_t;
+
+camera_t camera = { .x = 512, .y = 512, .zFar = 400 };
+
 SDL_Window* window;
 SDL_Renderer* renderer;
 
@@ -91,8 +100,6 @@ void Setup()
 
 	colorMap = stbi_load("Maps/png/map0.color.png", &width, &height, &bitDepth1, 0);
 	height = stbi_load("Maps/png/map0.height.png", &width, &height, &bitDepth2, 0);
-
-
 }
 
 void Input()
@@ -121,6 +128,8 @@ void Update()
 	float deltaTime = (SDL_GetTicks() - lastFrameTime) / 1000.0;
 
 	lastFrameTime = SDL_GetTicks();
+
+	
 }
 
 void Render()
@@ -131,6 +140,34 @@ void Render()
 	ClearFameBuffer(0xFF00FF00);
 
 	//Draw Stuff
+	//DrawPixel(100, 100, 0xFF0000FF);
+
+	float plx = -camera.zFar;
+	float ply = +camera.zFar;
+
+	float prx = +camera.zFar;
+	float pry = +camera.zFar;
+
+	for (int i = 0; i < WIDTH; i++)
+	{
+		float deltaX = (plx + (prx - plx) / WIDTH * i) / camera.zFar;
+		float deltaY = (ply + (pry - ply) / WIDTH * i) / camera.zFar;
+
+		float rx = camera.x;
+		float ry = camera.y;
+
+		for (int z = 1; z < camera.zFar; z++)
+		{
+			rx += deltaX;
+			ry -= deltaY;
+
+			/*int mapOffset = ((1024 * (int)ry) + (int)rx);
+
+			int heightOnScreen = heightMap[mapOffset];*/
+
+			DrawPixel((int)rx/4, (int)ry/4, 0xFF0000FF);
+		}
+	}
 
 	RenderFrameBuffer();
 }
