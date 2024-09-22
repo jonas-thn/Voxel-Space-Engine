@@ -130,6 +130,8 @@ void Setup()
 	colorMap = stbi_load("Maps/png/map0.color.png", &width, &height, &bitDepth1, 0);
 	heightMap = stbi_load("Maps/png/map0.height.png", &width, &height, &bitDepth2, 0);
 
+	printf("%d, %d\n", width, height);
+
 	colorMapRGBA = (uint32_t*)malloc(width * height * sizeof(uint32_t));
 
 	ConvertRGBtoRGBA(colorMap, colorMapRGBA, width * height);
