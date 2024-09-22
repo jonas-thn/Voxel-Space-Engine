@@ -260,7 +260,7 @@ void Render()
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 
-	ClearFameBuffer(0xFF660022);
+	ClearFameBuffer(0x6688FFFF);
 
 	//Draw Stuff
 
@@ -285,7 +285,7 @@ void Render()
 			rx += deltaX;
 			ry -= deltaY;
 
-			int mapOffset = ((1024 * (int)ry) + (int)rx);
+			int mapOffset = ((1024 * ((int)ry & 1023)) + ((int)rx & 1023));
 
 			int heightOnScreen = (int)((camera.height - heightMap[mapOffset]) / z * SCALE_FACTOR);
 
