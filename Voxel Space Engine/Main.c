@@ -5,7 +5,9 @@
 #include <math.h>
 
 #include <SDL.h>
-#include "Gifdec/gifdec.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stbImage/stb_image.h"
 
 #define FALSE 0
 #define TRUE 1
@@ -85,7 +87,11 @@ void Setup()
 	frameBuffer = (uint32_t*)malloc(WIDTH * HEIGHT * sizeof(uint32_t));
 	frameBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
 
-	int mapWidth, mapHeight, mapCount;
+	int width, height, bitDepth1, bitDepth2;
+
+	colorMap = stbi_load("Maps/png/map0.color.png", &width, &height, &bitDepth1, 0);
+	height = stbi_load("Maps/png/map0.height.png", &width, &height, &bitDepth2, 0);
+
 
 }
 
@@ -125,13 +131,15 @@ void Render()
 	ClearFameBuffer(0xFF00FF00);
 
 	//Draw Stuff
-	DrawPixel(100, 100, 0xFF0000FF);
 
 	RenderFrameBuffer();
 }
 
 void Destroy()
 {
+	stbi_image_free(colorMap);
+	stbi_image_free(heightMap);
+
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
@@ -142,8 +150,6 @@ int main(int argc, char* argv[])
 	running = InitializeWindow();
 
 	Setup();
-
-	printf("Test");
 
 	while (running)
 	{
