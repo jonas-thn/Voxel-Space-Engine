@@ -18,6 +18,8 @@
 #define WIDTH 320
 #define HEIGHT 200
 
+#define PI 3.141592653 
+
 const float SCALE_FACTOR = 100.0;
 
 typedef struct
@@ -25,11 +27,12 @@ typedef struct
 	float x;
 	float y;
 	float zFar;
+	float angle;
 	float height;
 	float speed;
 } camera_t;
 
-camera_t camera = { .x = 512, .y = 512, .zFar = 400, .height = 150, .speed = 100};
+camera_t camera = { .x = 512, .y = 512, .zFar = 400, .height = 150, .angle = 0, .speed = 100};
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -49,6 +52,8 @@ int forward = FALSE;
 int backward = FALSE;
 int up = FALSE;
 int down = FALSE;
+int anglePlus = FALSE;
+int angleMinus = FALSE;
 
 int lastFrameTime = 0;
 
@@ -178,6 +183,16 @@ void Input()
 			down = TRUE;
 		}
 
+		if (event.key.keysym.sym == SDLK_LEFT)
+		{
+			angleMinus = TRUE;
+		}
+
+		if (event.key.keysym.sym == SDLK_RIGHT)
+		{
+			anglePlus = TRUE;
+		}
+
 
 		break;
 
@@ -213,6 +228,16 @@ void Input()
 			down = FALSE;
 		}
 
+		if (event.key.keysym.sym == SDLK_LEFT)
+		{
+			angleMinus = FALSE;
+		}
+
+		if (event.key.keysym.sym == SDLK_RIGHT)
+		{
+			anglePlus = FALSE;
+		}
+
 		break;
 	}
 }
@@ -225,22 +250,26 @@ void Update()
 
 	if (forward)
 	{
-		camera.y -= camera.speed * deltaTime;
+		camera.x += sin(camera.angle + PI/2) * deltaTime * camera.speed;
+		camera.y += cos(camera.angle + PI/2) * deltaTime * camera.speed;
 	}
 
 	if (backward)
 	{
-		camera.y += camera.speed * deltaTime;
+		camera.x -= sin(camera.angle + PI/2) * deltaTime * camera.speed;
+		camera.y -= cos(camera.angle + PI/2) * deltaTime * camera.speed;
 	}
 
 	if (left)
 	{
-		camera.x -= camera.speed * deltaTime;
+		camera.x += sin(camera.angle) * deltaTime * camera.speed;
+		camera.y += cos(camera.angle) * deltaTime * camera.speed;
 	}
 	
 	if (right)
 	{
-		camera.x += camera.speed * deltaTime;
+		camera.x -= sin(camera.angle) * deltaTime * camera.speed;
+		camera.y -= cos(camera.angle) * deltaTime * camera.speed;
 	}
 
 	if (up)
@@ -251,6 +280,16 @@ void Update()
 	if (down)
 	{
 		camera.height -= camera.speed * deltaTime;
+	}
+
+	if (anglePlus)
+	{
+		camera.angle += deltaTime * 1;
+	}
+
+	if (angleMinus)
+	{
+		camera.angle -= deltaTime * 1;
 	}
 
 }
@@ -264,11 +303,14 @@ void Render()
 
 	//Draw Stuff
 
-	float plx = -camera.zFar;
-	float ply = +camera.zFar;
+	float sinangle = sin(camera.angle);
+	float cosangle = cos(camera.angle);
 
-	float prx = +camera.zFar;
-	float pry = +camera.zFar;
+	float plx = cosangle * camera.zFar + sinangle * camera.zFar;
+	float ply = sinangle * camera.zFar - cosangle * camera.zFar;
+
+	float prx = cosangle * camera.zFar - sinangle * camera.zFar;
+	float pry = sinangle * camera.zFar + cosangle * camera.zFar;
 
 	for (int i = 0; i < WIDTH; i++)
 	{
