@@ -26,9 +26,10 @@ typedef struct
 	float y;
 	float zFar;
 	float height;
+	float speed;
 } camera_t;
 
-camera_t camera = { .x = 512, .y = 512, .zFar = 400, .height = 150};
+camera_t camera = { .x = 512, .y = 512, .zFar = 400, .height = 150, .speed = 100};
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -41,6 +42,13 @@ uint8_t* colorMap = NULL;
 uint32_t* colorMapRGBA = NULL;
 
 int running = FALSE;
+
+int left = FALSE;
+int right = FALSE;
+int forward = FALSE;
+int backward = FALSE;
+int up = FALSE;
+int down = FALSE;
 
 int lastFrameTime = 0;
 
@@ -139,6 +147,72 @@ void Input()
 		{
 			running = FALSE;
 		}
+
+		if (event.key.keysym.sym == SDLK_w)
+		{
+			forward = TRUE;
+		}
+
+		if (event.key.keysym.sym == SDLK_s)
+		{
+			backward = TRUE;
+		}
+
+		if (event.key.keysym.sym == SDLK_a)
+		{
+			left = TRUE;
+		}
+
+		if (event.key.keysym.sym == SDLK_d)
+		{
+			right = TRUE;
+		}
+
+		if (event.key.keysym.sym == SDLK_SPACE)
+		{
+			up = TRUE;
+		}
+
+		if (event.key.keysym.sym == SDLK_LSHIFT)
+		{
+			down = TRUE;
+		}
+
+
+		break;
+
+	case SDL_KEYUP:
+
+		if (event.key.keysym.sym == SDLK_w)
+		{
+			forward = FALSE;
+		}
+
+		if (event.key.keysym.sym == SDLK_s)
+		{
+			backward = FALSE;
+		}
+
+		if (event.key.keysym.sym == SDLK_a)
+		{
+			left = FALSE;
+		}
+
+		if (event.key.keysym.sym == SDLK_d)
+		{
+			right = FALSE;
+		}
+
+		if (event.key.keysym.sym == SDLK_SPACE)
+		{
+			up = FALSE;
+		}
+
+		if (event.key.keysym.sym == SDLK_LSHIFT)
+		{
+			down = FALSE;
+		}
+
 		break;
 	}
 }
@@ -148,6 +222,37 @@ void Update()
 	float deltaTime = (SDL_GetTicks() - lastFrameTime) / 1000.0;
 
 	lastFrameTime = SDL_GetTicks();
+
+	if (forward)
+	{
+		camera.y -= camera.speed * deltaTime;
+	}
+
+	if (backward)
+	{
+		camera.y += camera.speed * deltaTime;
+	}
+
+	if (left)
+	{
+		camera.x -= camera.speed * deltaTime;
+	}
+	
+	if (right)
+	{
+		camera.x += camera.speed * deltaTime;
+	}
+
+	if (up)
+	{
+		camera.height += camera.speed * deltaTime;
+	}
+
+	if (down)
+	{
+		camera.height -= camera.speed * deltaTime;
+	}
+
 }
 
 void Render()
