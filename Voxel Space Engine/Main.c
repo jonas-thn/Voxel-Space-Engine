@@ -18,14 +18,17 @@
 #define WIDTH 320
 #define HEIGHT 200
 
+const float SCALE_FACTOR = 100.0;
+
 typedef struct
 {
 	float x;
 	float y;
 	float zFar;
+	float height;
 } camera_t;
 
-camera_t camera = { .x = 512, .y = 512, .zFar = 400 };
+camera_t camera = { .x = 512, .y = 512, .zFar = 400, .height = 150};
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -35,6 +38,7 @@ SDL_Texture* frameBufferTexture = NULL;
 
 uint8_t* heightMap = NULL;
 uint8_t* colorMap = NULL;
+uint32_t* colorMapRGBA = NULL;
 
 int running = FALSE;
 
@@ -91,15 +95,31 @@ void ClearFameBuffer(uint32_t color)
 	}
 }
 
+void ConvertRGBtoRGBA(const uint8_t* rgbBuffer, uint32_t* rgbaBuffer, size_t numPixels)
+{
+	for (size_t i = 0; i < numPixels; ++i)
+	{
+		uint8_t r = rgbBuffer[i * 3 + 0];
+		uint8_t g = rgbBuffer[i * 3 + 1];
+		uint8_t b = rgbBuffer[i * 3 + 2];
+
+		rgbaBuffer[i] = (b << 24) | (g << 16) | (r << 8) | 0xFF;
+	}
+}
+
 void Setup()
 {
 	frameBuffer = (uint32_t*)malloc(WIDTH * HEIGHT * sizeof(uint32_t));
-	frameBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
+	frameBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR32, SDL_TEXTUREACCESS_STREAMING, WIDTH, HEIGHT);
 
 	int width, height, bitDepth1, bitDepth2;
 
 	colorMap = stbi_load("Maps/png/map0.color.png", &width, &height, &bitDepth1, 0);
-	height = stbi_load("Maps/png/map0.height.png", &width, &height, &bitDepth2, 0);
+	heightMap = stbi_load("Maps/png/map0.height.png", &width, &height, &bitDepth2, 0);
+
+	colorMapRGBA = (uint32_t*)malloc(width * height * sizeof(uint32_t));
+
+	ConvertRGBtoRGBA(colorMap, colorMapRGBA, width * height);
 }
 
 void Input()
@@ -128,8 +148,6 @@ void Update()
 	float deltaTime = (SDL_GetTicks() - lastFrameTime) / 1000.0;
 
 	lastFrameTime = SDL_GetTicks();
-
-	
 }
 
 void Render()
@@ -137,10 +155,9 @@ void Render()
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 
-	ClearFameBuffer(0xFF00FF00);
+	ClearFameBuffer(0xFF660022);
 
 	//Draw Stuff
-	//DrawPixel(100, 100, 0xFF0000FF);
 
 	float plx = -camera.zFar;
 	float ply = +camera.zFar;
@@ -156,16 +173,36 @@ void Render()
 		float rx = camera.x;
 		float ry = camera.y;
 
+		float maxHeight = HEIGHT;
+
 		for (int z = 1; z < camera.zFar; z++)
 		{
 			rx += deltaX;
 			ry -= deltaY;
 
-			/*int mapOffset = ((1024 * (int)ry) + (int)rx);
+			int mapOffset = ((1024 * (int)ry) + (int)rx);
 
-			int heightOnScreen = heightMap[mapOffset];*/
+			int heightOnScreen = (int)((camera.height - heightMap[mapOffset]) / z * SCALE_FACTOR);
 
-			DrawPixel((int)rx/4, (int)ry/4, 0xFF0000FF);
+			if (heightOnScreen < 0)
+			{
+				heightOnScreen = 0;
+			}
+
+			if (heightOnScreen > HEIGHT)
+			{
+				heightOnScreen = HEIGHT - 1;
+			}
+
+			if (heightOnScreen < maxHeight)
+			{
+				for (int y = heightOnScreen; y < maxHeight; y++)
+				{
+					DrawPixel(i, y, colorMapRGBA[mapOffset]);
+				}
+
+				maxHeight = heightOnScreen;
+			}
 		}
 	}
 
@@ -174,6 +211,9 @@ void Render()
 
 void Destroy()
 {
+	free(frameBuffer);
+	free(colorMapRGBA);
+
 	stbi_image_free(colorMap);
 	stbi_image_free(heightMap);
 
